@@ -528,6 +528,36 @@ tr:hover {
     transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.signature {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.signature a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.signature a:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.signature a svg {
+    width: 20px;
+    height: 20px;
+}
+
 @media (max-width: 768px) {
     body {
         padding: 10px;
