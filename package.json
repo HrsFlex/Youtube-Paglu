@@ -1,7 +1,7 @@
 {
-  "name": "yt-video-tracker",
+  "name": "youtube-paglu",
   "version": "1.0.0",
-  "description": "YouTube Video Progress Tracker with database integration",
+  "description": "Youtube Paglu - Track your YouTube learning progress",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
