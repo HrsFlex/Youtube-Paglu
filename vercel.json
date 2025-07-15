@@ -3,13 +3,23 @@
     "name": "video-progress-tracker",
     "builds": [
         {
-            "src": "*.html",
+            "src": "**/*",
             "use": "@vercel/static"
         }
     ],
     "routes": [
         {
+            "src": "/styles.css",
+            "headers": {
+                "Cache-Control": "public, max-age=0, must-revalidate",
+                "Content-Type": "text/css"
+            }
+        },
+        {
             "src": "/(.*)",
+            "headers": {
+                "Cache-Control": "public, max-age=0, must-revalidate"
+            },
             "dest": "/$1"
         }
     ]
