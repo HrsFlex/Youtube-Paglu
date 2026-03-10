@@ -2,10 +2,9 @@
   "name": "youtube-paglu",
   "version": "1.0.0",
   "description": "Youtube Paglu - Track your YouTube learning progress",
-  "main": "server.js",
   "scripts": {
-    "server": "node server.js",
-    "dev-server": "nodemon server.js"
+    "server": "node local-server.js",
+    "dev-server": "nodemon local-server.js"
   },
   "dependencies": {
     "@distube/ytpl": "^1.2.4",
