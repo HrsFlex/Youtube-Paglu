@@ -6,7 +6,6 @@
 
 // ─── Hardcoded Config ────────────────────────────────────────
 const PLAYLIST_ID     = 'PLxbwE86jKRgMpuZuLBivzlM8s2Dk5lXBQ';
-const EMBEDDED_API_KEY = 'AIzaSyDjI6-CbFZfqUf03CJG48rMbvQuR0RQ3W8';
 
 // ─── State ───────────────────────────────────────────────────
 let videoData       = [];

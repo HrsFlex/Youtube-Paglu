@@ -1,26 +1,6 @@
 {
-    "version": 2,
-    "name": "youtube-paglu",
-    "builds": [
-        {
-            "src": "**/*",
-            "use": "@vercel/static"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/styles.css",
-            "headers": {
-                "Cache-Control": "public, max-age=0, must-revalidate",
-                "Content-Type": "text/css"
-            }
-        },
-        {
-            "src": "/(.*)",
-            "headers": {
-                "Cache-Control": "public, max-age=0, must-revalidate"
-            },
-            "dest": "/$1"
-        }
-    ]
-} 
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/playlist", "destination": "/api/playlist.js" }
+  ]
+}
