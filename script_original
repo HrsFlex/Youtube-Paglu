@@ -1,114 +1,43 @@
 /* ============================================================
-   ILovePlaylist — Script
-   Hardcoded playlist — auto-fetches on first visit,
-   then works from localStorage on every subsequent visit.
+   ILovePlaylist — Enhanced Script
+   Pre-filled API key, toast system, dark mode, filter tabs,
+   empty state, keyboard shortcuts, auto-save
    ============================================================ */
 
-// ─── Hardcoded Config ────────────────────────────────────────
-const PLAYLIST_ID     = 'PLxbwE86jKRgMpuZuLBivzlM8s2Dk5lXBQ';
+// ─── Constants ───────────────────────────────────────────────
 const EMBEDDED_API_KEY = 'AIzaSyDjI6-CbFZfqUf03CJG48rMbvQuR0RQ3W8';
 
 // ─── State ───────────────────────────────────────────────────
-let videoData       = [];
-let currentFilter   = 'all';
-let fetchController = null;
+let videoData        = [];
+let currentFilter    = 'all';
+let fetchController  = null;
 
 // ─── LocalStorage ────────────────────────────────────────────
 function saveToLocalStorage() {
-    localStorage.setItem('ilpData',    JSON.stringify(videoData));
-    localStorage.setItem('ilpDark',    document.documentElement.getAttribute('data-theme') || 'light');
-    localStorage.setItem('ilpUpdated', new Date().toISOString());
+    localStorage.setItem('ilpData',       JSON.stringify(videoData));
+    localStorage.setItem('ilpDarkMode',   document.documentElement.getAttribute('data-theme') || 'light');
+    localStorage.setItem('ilpUpdated',    new Date().toISOString());
 }
 
 function loadFromLocalStorage() {
     const saved = localStorage.getItem('ilpData');
-    const theme = localStorage.getItem('ilpDark');
-    if (theme === 'dark') applyDarkMode(true);
-
     if (saved) {
         videoData = JSON.parse(saved);
         document.getElementById('videoTableBody').innerHTML = '';
         videoData.forEach((v, i) => addVideoToTable(v, i + 1));
         updateStats();
-        toggleEmptyState();
-    } else {
-        // First visit — auto-fetch the hardcoded playlist
-        toggleEmptyState();
-        autoFetchPlaylist();
     }
+    // Restore dark mode
+    const theme = localStorage.getItem('ilpDarkMode');
+    if (theme === 'dark') applyDarkMode(true);
+    toggleEmptyState();
 }
-
-// ─── Auto-Fetch on First Load ────────────────────────────────
-async function autoFetchPlaylist() {
-    showLoadingModal('Loading your CCNA playlist…');
-    try {
-        fetchController = new AbortController();
-
-        const resp = await fetch('/api/playlist', { signal: fetchController.signal });
-        if (!resp.ok) {
-            const err = await resp.json().catch(() => ({}));
-            throw new Error(err.error || `Server error ${resp.status}`);
-        }
-
-        const data    = await resp.json();          // { items: [...], title }
-        const videos  = data.items || [];
-
-        if (videos.length === 0) {
-            hideLoadingModal();
-            showToast('No videos found in the playlist.', 'error');
-            return;
-        }
-
-        videoData = [];
-        document.getElementById('videoTableBody').innerHTML = '';
-
-        videos.forEach((video, index) => {
-            const v = {
-                id:            Date.now() + index,
-                title:         video.title,
-                url:           `https://www.youtube.com/watch?v=${video.videoId}`,
-                status:        'not-started',
-                dateStarted:   '',
-                dateCompleted: '',
-                duration:      video.duration || '',
-                notes:         '',
-                lastModified:  new Date().toISOString()
-            };
-            videoData.push(v);
-            addVideoToTable(v, index + 1);
-        });
-
-        updateStats();
-        saveToLocalStorage();
-        hideLoadingModal();
-        showToast(`🎉 Loaded ${videos.length} videos!`, 'success');
-
-    } catch (err) {
-        hideLoadingModal();
-        if (err.name !== 'AbortError') {
-            showToast('Could not load playlist: ' + err.message, 'error');
-        }
-    }
-}
-
-// Manual refresh — clears saved data and re-fetches live
-async function refreshPlaylist() {
-    if (!confirm('This will re-fetch the playlist and reset all your progress. Continue?')) return;
-    localStorage.removeItem('ilpData');
-    videoData = [];
-    document.getElementById('videoTableBody').innerHTML = '';
-    updateStats();
-    await autoFetchPlaylist();
-}
-
-// ─── API Fetch (unused — proxy handles everything) ────────────
-async function fetchPlaylistVideos() { /* handled by /api/playlist */ }
 
 // ─── Toast Notifications ─────────────────────────────────────
 function showToast(message, type = 'info') {
-    const icons     = { success: '✅', error: '❌', info: 'ℹ️' };
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
     const container = document.getElementById('toastContainer');
-    const toast     = document.createElement('div');
+    const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.setAttribute('role', 'alert');
     toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span><span class="toast-msg">${message}</span>`;
@@ -116,7 +45,7 @@ function showToast(message, type = 'info') {
     setTimeout(() => {
         toast.classList.add('fade-out');
         toast.addEventListener('animationend', () => toast.remove(), { once: true });
-    }, 3500);
+    }, 3200);
 }
 
 // ─── Dark Mode ───────────────────────────────────────────────
@@ -133,20 +62,20 @@ function toggleDarkMode() {
 
 // ─── Stats ───────────────────────────────────────────────────
 function updateStats() {
-    const total      = videoData.length;
-    const completed  = videoData.filter(v => v.status === 'completed').length;
+    const total     = videoData.length;
+    const completed = videoData.filter(v => v.status === 'completed').length;
     const inProgress = videoData.filter(v => v.status === 'in-progress').length;
-    const pct        = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    document.getElementById('totalVideos').textContent       = total;
-    document.getElementById('completedVideos').textContent   = completed;
-    document.getElementById('inProgressVideos').textContent  = inProgress;
+    document.getElementById('totalVideos').textContent      = total;
+    document.getElementById('completedVideos').textContent  = completed;
+    document.getElementById('inProgressVideos').textContent = inProgress;
     document.getElementById('progressPercentage').textContent = pct + '%';
-    document.getElementById('progressFill').style.width      = pct + '%';
-    document.getElementById('progressLabel').textContent     = `${completed} / ${total} videos`;
+    document.getElementById('progressFill').style.width     = pct + '%';
+    document.getElementById('progressLabel').textContent    = `${completed} / ${total} videos`;
 
     const bar = document.getElementById('progressBarWrapper');
-    if (bar) bar.setAttribute('aria-valuenow', pct);
+    if (bar) { bar.setAttribute('aria-valuenow', pct); }
 
     toggleEmptyState();
 }
@@ -155,10 +84,11 @@ function updateStats() {
 function toggleEmptyState() {
     const state = document.getElementById('emptyState');
     if (!state) return;
-    state.classList.toggle('visible', videoData.length === 0);
+    const visible = videoData.length === 0;
+    state.classList.toggle('visible', visible);
 }
 
-// ─── Add Video Modal (manual entry still available) ──────────
+// ─── Add Video Modal ─────────────────────────────────────────
 function addVideo() {
     openModal('addVideoModal');
 }
@@ -199,13 +129,141 @@ function saveVideo() {
     updateStats();
     saveToLocalStorage();
     closeModal();
-    showToast(`"${title}" added!`, 'success');
+    showToast(`"${title}" added successfully!`, 'success');
+}
+
+// ─── Fetch Modal ─────────────────────────────────────────────
+function showFetchModal() {
+    openModal('fetchModal');
+    // Auto-select API method and show inputs immediately (API key pre-filled)
+    selectFetchMethod('api');
+}
+
+function closeFetchModal() {
+    closeModalById('fetchModal');
+    document.getElementById('fetchInputs').innerHTML = '';
+    document.getElementById('fetchButton').disabled  = true;
+}
+
+function selectFetchMethod(method) {
+    document.getElementById('fetchButton').disabled = false;
+
+    if (method === 'api') {
+        document.getElementById('fetchInputs').innerHTML = `
+            <div class="form-group">
+                <label for="playlistUrl">YouTube Playlist URL <span class="required">*</span></label>
+                <input type="url" id="playlistUrl" placeholder="https://www.youtube.com/playlist?list=..." autofocus>
+            </div>
+            <p style="font-size:.82rem; color:var(--text-3); margin-top:-8px; margin-bottom:4px;">
+                🔑 API key is pre-configured. Just paste your playlist URL and fetch!
+            </p>
+        `;
+    }
+}
+
+// ─── Fetch Playlist ──────────────────────────────────────────
+async function startFetch() {
+    await fetchWithAPI();
+}
+
+async function fetchWithAPI() {
+    const playlistUrl = document.getElementById('playlistUrl')?.value?.trim();
+    const apiKey      = EMBEDDED_API_KEY;
+
+    if (!playlistUrl) {
+        showToast('Please enter a YouTube playlist URL.', 'error');
+        return;
+    }
+
+    const playlistId = extractPlaylistId(playlistUrl);
+    if (!playlistId) {
+        showToast('Invalid playlist URL. Make sure it contains ?list=...', 'error');
+        return;
+    }
+
+    closeFetchModal();
+    showLoadingModal('Connecting to YouTube…');
+
+    try {
+        fetchController  = new AbortController();
+        const videos     = await fetchPlaylistVideos(playlistId, apiKey, fetchController.signal);
+
+        if (videos.length > 0) {
+            videoData        = [];
+            document.getElementById('videoTableBody').innerHTML = '';
+
+            videos.forEach((video, index) => {
+                const v = {
+                    id:            Date.now() + index,
+                    title:         video.title,
+                    url:           `https://www.youtube.com/watch?v=${video.videoId}`,
+                    status:        'not-started',
+                    dateStarted:   '',
+                    dateCompleted: '',
+                    duration:      video.duration || '',
+                    notes:         '',
+                    lastModified:  new Date().toISOString()
+                };
+                videoData.push(v);
+                addVideoToTable(v, index + 1);
+            });
+
+            updateStats();
+            saveToLocalStorage();
+            hideLoadingModal();
+            showToast(`🎉 Fetched ${videos.length} videos successfully!`, 'success');
+        } else {
+            hideLoadingModal();
+            showToast('No videos found in that playlist. Is it public?', 'error');
+        }
+    } catch (err) {
+        hideLoadingModal();
+        if (err.name !== 'AbortError') {
+            showToast('Error: ' + err.message, 'error');
+        }
+    }
+}
+
+function extractPlaylistId(url) {
+    const match = url.match(/[?&]list=([^&]+)/);
+    return match ? match[1] : null;
+}
+
+async function fetchPlaylistVideos(playlistId, apiKey, signal) {
+    const videos       = [];
+    let nextPageToken  = '';
+
+    do {
+        const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${apiKey}${nextPageToken ? '&pageToken=' + nextPageToken : ''}`;
+        const resp = await fetch(url, { signal });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.error?.message || `API Error ${resp.status}`);
+        }
+
+        const data = await resp.json();
+
+        for (const item of data.items) {
+            // Skip deleted/private videos
+            if (item.snippet.title === 'Deleted video' || item.snippet.title === 'Private video') continue;
+            videos.push({
+                title:   item.snippet.title,
+                videoId: item.snippet.resourceId.videoId
+            });
+        }
+
+        nextPageToken = data.nextPageToken || '';
+        document.getElementById('loadingStatus').textContent = `Fetched ${videos.length} videos…`;
+
+    } while (nextPageToken);
+
+    return videos;
 }
 
 // ─── Loading Modal ───────────────────────────────────────────
 function showLoadingModal(msg) {
-    const el = document.getElementById('loadingStatus');
-    if (el) el.textContent = msg;
+    document.getElementById('loadingStatus').textContent = msg;
     openModal('loadingModal');
 }
 
@@ -233,12 +291,12 @@ function closeModalById(id) {
 function addVideoToTable(video, index) {
     const tbody = document.getElementById('videoTableBody');
     const row   = document.createElement('tr');
-    row.setAttribute('data-id',     video.id);
+    row.setAttribute('data-id', video.id);
     row.setAttribute('data-status', video.status);
 
     row.innerHTML = `
         <td>${index}</td>
-        <td style="font-weight:600;color:var(--text);max-width:320px;word-break:break-word;">${escapeHtml(video.title)}</td>
+        <td style="font-weight:600; color:var(--text); max-width:300px; word-break:break-word;">${escapeHtml(video.title)}</td>
         <td>
             <a href="${escapeHtml(video.url)}" class="video-link" target="_blank" rel="noopener" aria-label="Watch ${escapeHtml(video.title)}">
                 ▶ Watch
@@ -248,7 +306,7 @@ function addVideoToTable(video, index) {
             <select class="status-select status-${video.status}"
                     onchange="updateStatus(this)"
                     data-id="${video.id}"
-                    aria-label="Status">
+                    aria-label="Status for ${escapeHtml(video.title)}">
                 <option value="not-started" ${video.status === 'not-started' ? 'selected' : ''}>Not Started</option>
                 <option value="in-progress" ${video.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
                 <option value="completed"   ${video.status === 'completed'   ? 'selected' : ''}>Completed</option>
@@ -269,7 +327,8 @@ function addVideoToTable(video, index) {
                       onchange="updateVideoData(${video.id}, 'notes', this.value)"
                       aria-label="Notes">${escapeHtml(video.notes)}</textarea></td>
         <td>
-            <button class="delete-btn" onclick="deleteRow(this)" data-id="${video.id}" title="Remove" aria-label="Remove">🗑</button>
+            <button class="delete-btn" onclick="deleteRow(this)" data-id="${video.id}"
+                    aria-label="Delete ${escapeHtml(video.title)}" title="Delete">🗑</button>
         </td>
     `;
     tbody.appendChild(row);
@@ -278,11 +337,11 @@ function addVideoToTable(video, index) {
 function escapeHtml(str) {
     if (!str) return '';
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g,  '&amp;')
+        .replace(/</g,  '&lt;')
+        .replace(/>/g,  '&gt;')
+        .replace(/"/g,  '&quot;')
+        .replace(/'/g,  '&#39;');
 }
 
 // ─── Status Update ───────────────────────────────────────────
@@ -296,19 +355,21 @@ function updateStatus(select) {
     video.lastModified = new Date().toISOString();
     select.className   = `status-select status-${status}`;
 
+    // Update parent row data-status for filter
     const row = select.closest('tr');
     if (row) row.setAttribute('data-status', status);
 
+    // Auto-fill dates
     const now = new Date().toISOString().split('T')[0];
     if (status === 'in-progress' && !video.dateStarted) {
         video.dateStarted = now;
-        const dates = row.querySelectorAll('input[type="date"]');
-        if (dates[0]) dates[0].value = now;
+        const dateInputs = row.querySelectorAll('input[type="date"]');
+        if (dateInputs[0]) dateInputs[0].value = now;
     }
     if (status === 'completed' && !video.dateCompleted) {
         video.dateCompleted = now;
-        const dates = row.querySelectorAll('input[type="date"]');
-        if (dates[1]) dates[1].value = now;
+        const dateInputs = row.querySelectorAll('input[type="date"]');
+        if (dateInputs[1]) dateInputs[1].value = now;
     }
 
     applyCurrentFilter();
@@ -368,12 +429,16 @@ function setFilter(btn, filter) {
 
 function applyCurrentFilter() {
     const searchTerm = (document.getElementById('searchBox')?.value || '').toLowerCase();
-    document.querySelectorAll('#videoTableBody tr').forEach(row => {
-        const status      = row.getAttribute('data-status') || '';
-        const title       = (row.cells[1]?.textContent || '').toLowerCase();
-        const notes       = (row.cells[7]?.textContent || '').toLowerCase();
+    const rows       = document.querySelectorAll('#videoTableBody tr');
+
+    rows.forEach(row => {
+        const status    = row.getAttribute('data-status') || '';
+        const title     = (row.cells[1]?.textContent || '').toLowerCase();
+        const notes     = (row.cells[7]?.textContent || '').toLowerCase();
+
         const matchFilter = currentFilter === 'all' || status === currentFilter;
         const matchSearch = !searchTerm || title.includes(searchTerm) || notes.includes(searchTerm);
+
         row.style.display = (matchFilter && matchSearch) ? '' : 'none';
     });
 }
@@ -381,11 +446,11 @@ function applyCurrentFilter() {
 // ─── Export CSV ──────────────────────────────────────────────
 function exportToCSV() {
     if (videoData.length === 0) {
-        showToast('Nothing to export yet!', 'info');
+        showToast('Nothing to export — add some videos first!', 'info');
         return;
     }
     const headers = ['#', 'Title', 'URL', 'Status', 'Date Started', 'Date Completed', 'Duration', 'Notes'];
-    const rows    = videoData.map((v, i) => [
+    const rows = videoData.map((v, i) => [
         i + 1,
         `"${v.title.replace(/"/g, '""')}"`,
         `"${v.url}"`,
@@ -403,7 +468,7 @@ function exportToCSV() {
     });
     a.click();
     URL.revokeObjectURL(a.href);
-    showToast('Progress exported as CSV!', 'success');
+    showToast('CSV exported successfully!', 'success');
 }
 
 function importFromCSV() {
@@ -414,16 +479,17 @@ function handleFileImport(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    const reader    = new FileReader();
-    reader.onload   = function(e) {
-        const lines = e.target.result.split('\n').slice(1);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split('\n').slice(1); // skip header
         videoData   = [];
         document.getElementById('videoTableBody').innerHTML = '';
 
         lines.forEach((line, i) => {
             if (!line.trim()) return;
+            // Simple CSV parse (handles quoted fields)
             const cols = parseCSVLine(line);
-            const v    = {
+            const v = {
                 id:            Date.now() + i,
                 title:         cols[1] || '',
                 url:           cols[2] || '#',
@@ -443,6 +509,7 @@ function handleFileImport(event) {
         showToast(`Imported ${videoData.length} videos.`, 'success');
     };
     reader.readAsText(file);
+    // Reset file input so same file can be re-imported
     event.target.value = '';
 }
 
@@ -467,17 +534,29 @@ function parseCSVLine(line) {
 
 // ─── Keyboard Shortcuts ──────────────────────────────────────
 document.addEventListener('keydown', e => {
+    // Ctrl/Cmd + N → Add Video
     if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
         addVideo();
     }
+    // Escape → close any open modal
     if (e.key === 'Escape') {
         closeModal();
+        closeFetchModal();
         hideLoadingModal();
+    }
+});
+
+// Click backdrop to close modals
+window.addEventListener('click', e => {
+    if (e.target.classList.contains('modal-backdrop')) {
+        closeModal();
+        closeFetchModal();
     }
 });
 
 // ─── Init ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     loadFromLocalStorage();
+    updateStats();
 });

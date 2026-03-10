@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ILovePlaylist – Jeremy's IT Lab CCNA 200-301 Tracker</title>
-    <meta name="description" content="Track your CCNA 200-301 study progress through Jeremy's IT Lab free course. Mark videos complete, take notes, and monitor your exam prep — all saved locally.">
-    <meta name="keywords" content="CCNA 200-301, Jeremy's IT Lab, CCNA study tracker, free CCNA course, networking study progress, Cisco certification">
+    <title>ILovePlaylist – Track Your YouTube Learning Progress</title>
+    <meta name="description" content="ILovePlaylist helps you organize, track, and manage your YouTube playlist learning progress. Auto-fetch playlists, mark videos as complete, export CSV, and stay motivated.">
+    <meta name="keywords" content="youtube playlist tracker, learning progress, video tracker, playlist manager, online learning">
     <meta name="author" content="HRS">
-    <meta property="og:title" content="ILovePlaylist – CCNA 200-301 Study Tracker">
-    <meta property="og:description" content="Track your CCNA exam prep with Jeremy's IT Lab free course. Monitor every video, take notes, export your progress.">
+    <meta property="og:title" content="ILovePlaylist – YouTube Playlist Tracker">
+    <meta property="og:description" content="Track your YouTube playlist progress like a pro. Auto-fetch videos, manage status, export your data.">
     <meta property="og:type" content="website">
-    <meta name="theme-color" content="#1d6ce8">
+    <meta name="theme-color" content="#e63946">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,12 +46,12 @@
     <!-- Hero Section -->
     <header class="hero" role="banner">
         <div class="hero-inner">
-            <div class="hero-badge">📡 Jeremy's IT Lab · Free CCNA 200-301 Course</div>
+            <div class="hero-badge">🚀 Free YouTube Playlist Tracker</div>
             <h1 class="hero-title">
-                Track Your <span class="highlight">CCNA</span> Study Progress
+                Track Your <span class="highlight">Playlist</span> Progress
             </h1>
             <p class="hero-subtitle">
-                Your personal study dashboard for Jeremy's IT Lab free CCNA 200-301 course. Mark videos done, take notes, and watch your exam-readiness grow — all saved right in your browser.
+                Organize your YouTube learning journey. Auto-fetch entire playlists, track video status, take notes, and export your progress — all in one place.
             </p>
         </div>
     </header>
@@ -101,9 +101,9 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Add Video
                 </button>
-                <button class="btn btn-accent" onclick="refreshPlaylist()" aria-label="Sync playlist from YouTube" title="Re-fetch the CCNA playlist from YouTube">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-                    Sync Playlist
+                <button class="btn btn-accent" onclick="showFetchModal()" aria-label="Auto-fetch a YouTube playlist">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Auto-Fetch Playlist
                 </button>
                 <div class="btn-group">
                     <button class="btn btn-secondary" onclick="exportToCSV()" aria-label="Export to CSV">
@@ -164,37 +164,37 @@
                     </tbody>
                 </table>
                 <div id="emptyState" class="empty-state" aria-live="polite">
-                    <div class="empty-icon">📡</div>
-                    <h3>Loading your CCNA playlist…</h3>
-                    <p>Videos are being fetched automatically. If loading fails, click below to retry.</p>
-                    <button class="btn btn-primary" onclick="refreshPlaylist()">Retry Loading</button>
+                    <div class="empty-icon">🎬</div>
+                    <h3>No videos yet</h3>
+                    <p>Add videos manually or auto-fetch an entire YouTube playlist in one click.</p>
+                    <button class="btn btn-primary" onclick="showFetchModal()">Auto-Fetch Playlist</button>
                 </div>
             </div>
         </div>
 
         <!-- How-to Section -->
         <section class="howto-section" aria-labelledby="howtoTitle">
-            <h2 id="howtoTitle">About This Tracker</h2>
+            <h2 id="howtoTitle">How It Works</h2>
             <div class="howto-grid">
                 <article class="howto-card">
-                    <div class="howto-icon">📡</div>
-                    <h3>Jeremy's IT Lab</h3>
-                    <p>Built for the <a href="https://youtube.com/playlist?list=PLxbwE86jKRgMpuZuLBivzlM8s2Dk5lXBQ" target="_blank" rel="noopener">Free CCNA 200-301 course</a> — the most complete free CCNA resource available online, covering everything for the Cisco exam.</p>
+                    <div class="howto-icon">🔑</div>
+                    <h3>Get a Free API Key</h3>
+                    <p>Visit <a href="https://console.developers.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>, enable the YouTube Data API v3, and create a free API key.</p>
                 </article>
                 <article class="howto-card">
-                    <div class="howto-icon">📋</div>
-                    <h3>Track Each Video</h3>
-                    <p>Mark videos as Not Started, In Progress, Completed, or Skipped. Dates auto-fill when you change status, so your study history is always accurate.</p>
+                    <div class="howto-icon">🚀</div>
+                    <h3>Auto-Fetch Playlist</h3>
+                    <p>Paste any YouTube playlist URL + your API key, hit fetch — all videos load instantly.</p>
                 </article>
                 <article class="howto-card">
-                    <div class="howto-icon">📝</div>
-                    <h3>Take Study Notes</h3>
-                    <p>Each video has a notes field — jot down key commands, subnetting formulas, or concepts you need to revisit before exam day.</p>
+                    <div class="howto-icon">📊</div>
+                    <h3>Track Progress</h3>
+                    <p>Mark each video as Not Started, In Progress, Completed, or Skipped. Watch your stats update live.</p>
                 </article>
                 <article class="howto-card">
                     <div class="howto-icon">💾</div>
-                    <h3>Auto-Saved Locally</h3>
-                    <p>All progress is saved in your browser automatically. Export to CSV at any time to keep a backup or share your study log.</p>
+                    <h3>Export Anytime</h3>
+                    <p>Export your entire progress as a CSV file or import a previous session. Your data is also auto-saved locally.</p>
                 </article>
             </div>
         </section>
@@ -208,7 +208,7 @@
                 <span class="logo-i">I</span><span class="logo-love">Love</span><span class="logo-product">Playlist</span>
             </span>
             <span class="footer-sep">·</span>
-            <a href="https://youtube.com/playlist?list=PLxbwE86jKRgMpuZuLBivzlM8s2Dk5lXBQ" target="_blank" rel="noopener">Jeremy's IT Lab · CCNA 200-301</a>
+            <span>Free YouTube Playlist Tracker</span>
             <span class="footer-sep">·</span>
             <a href="https://www.linkedin.com/in/harsh-kumar-b0b879245/" target="_blank" rel="noopener" aria-label="LinkedIn profile of HRS">Made with ❤️ by HRS</a>
         </div>
@@ -246,11 +246,41 @@
         </div>
     </div>
 
+    <!-- Fetch Modal -->
+    <div id="fetchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="fetchTitle">
+        <div class="modal-backdrop" onclick="closeFetchModal()"></div>
+        <div class="modal-card modal-wide">
+            <div class="modal-header">
+                <h2 id="fetchTitle">🚀 Auto-Fetch Playlist</h2>
+                <button class="modal-close" onclick="closeFetchModal()" aria-label="Close modal">✕</button>
+            </div>
+            <p class="modal-desc">Enter your YouTube playlist URL and a free Google API key to automatically import all videos.</p>
+
+            <div class="fetch-method-card selected" onclick="selectFetchMethod('api')">
+                <input type="radio" name="fetchMethod" value="api" id="apiMethod" checked>
+                <label for="apiMethod">
+                    <strong>🔑 YouTube Data API v3</strong>
+                    <span>Most reliable · Gets complete video data · Free API key required</span>
+                </label>
+            </div>
+
+            <div id="fetchInputs" class="fetch-inputs"></div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeFetchModal()">Cancel</button>
+                <button class="btn btn-primary" id="fetchButton" onclick="startFetch()" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Fetch Playlist
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Modal -->
     <div id="loadingModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loadingTitle" aria-live="assertive">
         <div class="modal-card modal-loading">
             <div class="spinner" aria-hidden="true"></div>
-            <h2 id="loadingTitle">Loading CCNA Playlist…</h2>
+            <h2 id="loadingTitle">Fetching Playlist…</h2>
             <p id="loadingStatus">Connecting to YouTube…</p>
             <button class="btn btn-ghost" onclick="cancelFetch()">Cancel</button>
         </div>
